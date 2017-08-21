@@ -58,9 +58,9 @@ public final class NetworkUtils {
     "api.openweathermap.org/data/2.5/weather?";
 
     private static final String OPEN_WEATHER_MAP_URL =
-            "api.openweathermap.org/data/2.5/find?";
+            "http://api.openweathermap.org/data/2.5/forecast?";
 
-    private static final String FORECAST_BASE_URL = STATIC_test;
+    private static final String FORECAST_BASE_URL = OPEN_WEATHER_MAP_URL;
 
     /*
      * NOTE: These values only effect responses from OpenWeatherMap, NOT from the fake weather
@@ -74,7 +74,7 @@ public final class NetworkUtils {
     /* The units we want our API to return */
     private static final String units = "metric";
     /* The number of days we want our API to return */
-    private static final int numDays = 14;
+    private static final int numDays = 7;
 
     private static final String appid = "45b8d6692119cbf5511f1afea72b2f00";
 
@@ -131,8 +131,10 @@ public final class NetworkUtils {
         Uri weatherQueryUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                 .appendQueryParameter(LAT_PARAM, String.valueOf(latitude))
                 .appendQueryParameter(LON_PARAM, String.valueOf(longitude))
+                .appendQueryParameter(FORMAT_PARAM, format)
+                .appendQueryParameter(UNITS_PARAM, units)
+                .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
                 .appendQueryParameter(APPID,appid)
-
                 .build();
 
         try {
@@ -155,6 +157,7 @@ public final class NetworkUtils {
     private static URL buildUrlWithLocationQuery(String locationQuery) {
         Uri weatherQueryUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                 .appendQueryParameter(QUERY_PARAM, locationQuery)
+                .appendQueryParameter(FORMAT_PARAM, format)
                 .appendQueryParameter(UNITS_PARAM, units)
                 .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
                 .appendQueryParameter(APPID,appid)

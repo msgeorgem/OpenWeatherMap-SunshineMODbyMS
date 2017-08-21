@@ -35,6 +35,8 @@ public final class OpenWeatherJsonUtils {
     /* Location information */
     private static final String OWM_CITY = "city";
     private static final String OWM_COORD = "coord";
+    private static final String OWM_NAME = "name";
+    private static final String OWM_COUNTRY = "country";
 
     /* Location coordinate */
     private static final String OWM_LATITUDE = "lat";
@@ -42,6 +44,15 @@ public final class OpenWeatherJsonUtils {
 
     /* Weather information. Each day's forecast info is an element of the "list" array */
     private static final String OWM_LIST = "list";
+    private static final String OWM_DT = "dt";
+    private static final String OWM_MAIN = "main";
+    private static final String OWM_CLOUDS = "clouds";
+    private static final String OWM_ALL = "all";
+    private static final String OWM_WIND = "wind";
+    private static final String OWM_SPEED = "speed";
+    private static final String OWM_DEG = "deg";
+    private static final String OWM_RAIN = "rain";
+    private static final String OWM_3h = "3h";
 
     private static final String OWM_PRESSURE = "pressure";
     private static final String OWM_HUMIDITY = "humidity";
@@ -52,10 +63,11 @@ public final class OpenWeatherJsonUtils {
     private static final String OWM_TEMPERATURE = "temp";
 
     /* Max temperature for the day */
-    private static final String OWM_MAX = "max";
-    private static final String OWM_MIN = "min";
+    private static final String OWM_MAX = "temp_max";
+    private static final String OWM_MIN = "temp_min";
 
     private static final String OWM_WEATHER = "weather";
+    private static final String OWM_0 = "0";
     private static final String OWM_WEATHER_ID = "id";
 
     private static final String OWM_MESSAGE_CODE = "cod";
@@ -125,14 +137,15 @@ public final class OpenWeatherJsonUtils {
             int humidity;
             double windSpeed;
             double windDirection;
-
             double high;
             double low;
 
             int weatherId;
 
             /* Get the JSON object representing the day */
-            JSONObject dayForecast = jsonWeatherArray.getJSONObject(i);
+            JSONObject dayList = jsonWeatherArray.getJSONObject(i);
+            JSONObject mainObject = dayList.getJSONObject(OWM_MAIN);
+            JSONObject windObject = dayList.getJSONObject(OWM_WIND);
 
             /*
              * We ignore all the datetime values embedded in the JSON and assume that
@@ -140,31 +153,21 @@ public final class OpenWeatherJsonUtils {
              */
             dateTimeMillis = normalizedUtcStartDay + SunshineDateUtils.DAY_IN_MILLIS * i;
 
-            pressure = dayForecast.getDouble(OWM_PRESSURE);
-            humidity = dayForecast.getInt(OWM_HUMIDITY);
-            windSpeed = dayForecast.getDouble(OWM_WINDSPEED);
-            windDirection = dayForecast.getDouble(OWM_WIND_DIRECTION);
+            pressure = mainObject.getDouble(OWM_PRESSURE);
+            humidity = mainObject.getInt(OWM_HUMIDITY);
+            high = mainObject.getDouble(OWM_MAX);
+            low = mainObject.getDouble(OWM_MIN);
+            windSpeed = windObject.getDouble(OWM_WINDSPEED);
+            windDirection = windObject.getDouble(OWM_WIND_DIRECTION);
 
             /*
              * Description is in a child array called "weather", which is 1 element long.
              * That element also contains a weather code.
              */
             JSONObject weatherObject =
-                    dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
+                    dayList.getJSONArray(OWM_WEATHER).getJSONObject(0);
 
             weatherId = weatherObject.getInt(OWM_WEATHER_ID);
-
-            /*
-             * Temperatures are sent by Open Weather Map in a child object called "temp".
-             *
-             * Editor's Note: Try not to name variables "temp" when working with temperature.
-             * It confuses everybody. Temp could easily mean any number of things, including
-             * temperature, temporary variable, temporary folder, temporary employee, or many
-             * others, and is just a bad variable name.
-             */
-            JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
-            high = temperatureObject.getDouble(OWM_MAX);
-            low = temperatureObject.getDouble(OWM_MIN);
 
             ContentValues weatherValues = new ContentValues();
             weatherValues.put(WeatherContract.WeatherEntry.COLUMN_DATE, dateTimeMillis);
